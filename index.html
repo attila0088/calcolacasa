@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173f35">
+<title>CalcolaCasa — calcolatori per lavori in casa</title>
+<style>
+:root{--green:#173f35;--mint:#e8f2ed;--ink:#17211d;--muted:#66736d;--line:#dce5df;--paper:#fff;--bg:#f5f7f5;--accent:#d4e9dc}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);line-height:1.45}
+header{background:var(--green);color:white;padding:28px 18px 26px}
+.wrap{max-width:760px;margin:auto}
+.kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#c5dfd2;font-weight:700}
+h1{font-size:clamp(28px,6vw,40px);line-height:1.08;margin:8px 0}
+header p{margin:10px 0 0;color:#e1eee7;max-width:560px}
+main{padding:18px 14px 40px}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:white;color:var(--green);padding:12px 7px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer}
+.tab.active{background:var(--green);color:white;border-color:var(--green)}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px;box-shadow:0 5px 20px #173f3508}
+h2{font-size:21px;margin:0 0 6px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 18px}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-size:13px;font-weight:700;color:#33453c}
+input,select{width:100%;border:1px solid #cbd8d0;border-radius:10px;padding:12px 11px;font-size:16px;background:#fff;color:var(--ink);min-height:46px}
+input:focus,select:focus{outline:2px solid #8bb9a0;outline-offset:1px}
+.full{grid-column:1/-1}
+.result{background:var(--mint);border-radius:14px;padding:16px;margin-top:16px}
+.result .label{font-size:13px;color:#365b49;font-weight:700}
+.big{font-size:30px;letter-spacing:-.03em;font-weight:800;color:var(--green);margin:2px 0}
+.details{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.detail{background:#ffffffb8;border-radius:10px;padding:10px}
+.detail span{display:block;font-size:12px;color:var(--muted)}
+.detail strong{font-size:16px}
+.note{font-size:12px;color:var(--muted);margin:12px 2px 0}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+button.secondary{border:1px solid var(--line);background:white;color:var(--green);padding:10px 13px;border-radius:10px;font-weight:700;cursor:pointer}
+footer{padding:0 14px 28px;color:var(--muted);font-size:12px;text-align:center}
+.hidden{display:none!important}
+@media(max-width:430px){.fields{gap:10px}.panel{padding:15px}.tab{font-size:12px;padding:11px 4px}.big{font-size:27px}}
+@media print{header{background:white;color:black;padding:10px 0}header p,.kicker,.tabs,.actions,footer{display:none!important}main{padding:0}.panel{box-shadow:none;break-inside:avoid}.result{border:1px solid #aaa}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="kicker">Strumento gratuito</div>
+    <h1>CalcolaCasa</h1>
+    <p>Calcoli rapidi per piccoli lavori in casa: piastrelle, pittura e costo dei materiali. Inserisci le misure e ottieni una stima in pochi secondi.</p>
+  </div>
+</header>
+<main class="wrap">
+  <div class="tabs" role="tablist" aria-label="Tipo di calcolo">
+    <button class="tab active" data-tab="tiles" role="tab" aria-selected="true">▦ Piastrelle</button>
+    <button class="tab" data-tab="paint" role="tab" aria-selected="false">▤ Pittura</button>
+    <button class="tab" data-tab="budget" role="tab" aria-selected="false">€ Materiali</button>
+  </div>
+
+  <section class="panel" id="tiles">
+    <h2>Calcolo piastrelle</h2>
+    <p class="sub">Calcola quante piastrelle o quanti pacchi comprare, includendo una percentuale per gli scarti.</p>
+    <div class="fields">
+      <div class="field"><label for="tl">Lunghezza stanza (m)</label><input id="tl" type="number" min="0.01" step="0.01" value="5.60"></div>
+      <div class="field"><label for="tw">Larghezza stanza (m)</label><input id="tw" type="number" min="0.01" step="0.01" value="3.15"></div>
+      <div class="field"><label for="tsl">Lato piastrella (cm)</label><input id="tsl" type="number" min="1" step="0.1" value="31"></div>
+      <div class="field"><label for="tsw">Altro lato (cm)</label><input id="tsw" type="number" min="1" step="0.1" value="31"></div>
+      <div class="field"><label for="waste">Scarti (%)</label><select id="waste"><option value="5">5% — posa semplice</option><option value="10" selected>10% — consigliato</option><option value="15">15% — tagli/posa diagonale</option></select></div>
+      <div class="field"><label for="pack">Piastrelle per pacco</label><input id="pack" type="number" min="1" step="1" value="10"></div>
+      <div class="field full"><label for="tileprice">Prezzo per pacco (€) — facoltativo</label><input id="tileprice" type="number" min="0" step="0.01" placeholder="es. 24,90"></div>
+    </div>
+    <div class="result" aria-live="polite">
+      <div class="label">Superficie della stanza</div><div class="big" id="tileArea">17,64 m²</div>
+      <div class="details">
+        <div class="detail"><span>Piastrelle stimate con scarti</span><strong id="tileCount">207</strong></div>
+        <div class="detail"><span>Pacchi da acquistare</span><strong id="tilePacks">21</strong></div>
+        <div class="detail"><span>Superficie con scarti</span><strong id="tileWasteArea">19,40 m²</strong></div>
+        <div class="detail"><span>Costo stimato</span><strong id="tileCost">—</strong></div>
+      </div>
+    </div>
+    <p class="note">Stima matematica: la forma della stanza, la larghezza delle fughe, i tagli e il formato reale delle piastrelle possono modificare la quantità necessaria.</p>
+  </section>
+
+  <section class="panel hidden" id="paint">
+    <h2>Calcolo pittura</h2>
+    <p class="sub">Stima i litri necessari per le pareti, in base alla superficie e al numero di mani.</p>
+    <div class="fields">
+      <div class="field"><label for="pl">Lunghezza stanza (m)</label><input id="pl" type="number" min="0.01" step="0.01" value="5"></div>
+      <div class="field"><label for="pw">Larghezza stanza (m)</label><input id="pw" type="number" min="0.01" step="0.01" value="4"></div>
+      <div class="field"><label for="ph">Altezza pareti (m)</label><input id="ph" type="number" min="0.1" step="0.01" value="2.7"></div>
+      <div class="field"><label for="popen">Porte e finestre da sottrarre (m²)</label><input id="popen" type="number" min="0" step="0.1" value="3"></div>
+      <div class="field"><label for="pcover">Resa pittura (m²/litro per mano)</label><input id="pcover" type="number" min="0.1" step="0.1" value="10"></div>
+      <div class="field"><label for="phands">Numero di mani</label><select id="phands"><option value="1">1 mano</option><option value="2" selected>2 mani</option><option value="3">3 mani</option></select></div>
+      <div class="field full"><label for="pprice">Prezzo per litro (€) — facoltativo</label><input id="pprice" type="number" min="0" step="0.01" placeholder="es. 8,50"></div>
+    </div>
+    <div class="result" aria-live="polite">
+      <div class="label">Superficie netta da dipingere</div><div class="big" id="paintArea">45,60 m²</div>
+      <div class="details">
+        <div class="detail"><span>Litri stimati</span><strong id="paintLitres">9,12 L</strong></div>
+        <div class="detail"><span>Litri consigliati (+10%)</span><strong id="paintBuy">10,03 L</strong></div>
+        <div class="detail"><span>Mani previste</span><strong id="paintHands">2</strong></div>
+        <div class="detail"><span>Costo stimato</span><strong id="paintCost">—</strong></div>
+      </div>
+    </div>
+    <p class="note">La resa effettiva cambia in base al prodotto, all'assorbimento della parete e al colore di partenza. Controlla sempre l'etichetta della pittura.</p>
+  </section>
+
+  <section class="panel hidden" id="budget">
+    <h2>Calcolo costo materiali</h2>
+    <p class="sub">Somma i materiali, aggiungi eventuali costi extra e calcola il margine per imprevisti.</p>
+    <div class="fields">
+      <div class="field"><label for="b1">Materiale 1 (€)</label><input id="b1" type="number" min="0" step="0.01" value="90"></div>
+      <div class="field"><label for="b2">Materiale 2 (€)</label><input id="b2" type="number" min="0" step="0.01" value="25"></div>
+      <div class="field"><label for="b3">Materiale 3 (€)</label><input id="b3" type="number" min="0" step="0.01" value="0"></div>
+      <div class="field"><label for="b4">Trasporto / consegna (€)</label><input id="b4" type="number" min="0" step="0.01" value="0"></div>
+      <div class="field"><label for="bextra">Altri costi (€)</label><input id="bextra" type="number" min="0" step="0.01" value="0"></div>
+      <div class="field"><label for="bcont">Fondo imprevisti (%)</label><select id="bcont"><option value="0">0%</option><option value="5">5%</option><option value="10" selected>10%</option><option value="15">15%</option><option value="20">20%</option></select></div>
+    </div>
+    <div class="result" aria-live="polite">
+      <div class="label">Totale stimato con imprevisti</div><div class="big" id="budgetTotal">126,50 €</div>
+      <div class="details">
+        <div class="detail"><span>Subtotale materiali e costi</span><strong id="budgetSub">115,00 €</strong></div>
+        <div class="detail"><span>Fondo imprevisti</span><strong id="budgetExtra">11,50 €</strong></div>
+      </div>
+    </div>
+    <p class="note">Inserisci tutti gli importi nella stessa valuta. Il calcolo non include manodopera o costi non inseriti.</p>
+  </section>
+
+  <div class="actions">
+    <button class="secondary" id="printBtn">Stampa / Salva PDF</button>
+    <button class="secondary" id="resetBtn">Ripristina valori iniziali</button>
+  </div>
+</main>
+<footer>CalcolaCasa · Strumento gratuito, stime indicative. Nessun dato viene inviato a un server da questa pagina.</footer>
+<script>
+const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('it-IT',{minimumFractionDigits:d,maximumFractionDigits:d}):'—';
+const val=id=>Math.max(0,Number(document.getElementById(id).value)||0);
+function calcTiles(){
+ const l=val('tl'),w=val('tw'),sl=val('tsl')/100,sw=val('tsw')/100,sc=val('waste')/100,pack=Math.max(1,Math.floor(val('pack'))),price=document.getElementById('tileprice').value;
+ const area=l*w, tileArea=sl*sw;
+ const count=tileArea>0?Math.ceil(area*(1+sc)/tileArea):0;
+ const packs=Math.ceil(count/pack);
+ document.getElementById('tileArea').textContent=fmt(area)+' m²';
+ document.getElementById('tileCount').textContent=count.toLocaleString('it-IT');
+ document.getElementById('tilePacks').textContent=packs.toLocaleString('it-IT');
+ document.getElementById('tileWasteArea').textContent=fmt(area*(1+sc))+' m²';
+ document.getElementById('tileCost').textContent=price.trim()===''?'—':fmt(packs*Math.max(0,Number(price)||0))+' €';
+}
+function calcPaint(){
+ const l=val('pl'),w=val('pw'),h=val('ph'),open=val('popen'),cover=Math.max(.1,val('pcover')),hands=val('phands'),price=document.getElementById('pprice').value;
+ const area=Math.max(0,2*(l+w)*h-open), litres=area*hands/cover,buy=litres*1.1;
+ document.getElementById('paintArea').textContent=fmt(area)+' m²';
+ document.getElementById('paintLitres').textContent=fmt(litres)+' L';
+ document.getElementById('paintBuy').textContent=fmt(buy)+' L';
+ document.getElementById('paintHands').textContent=hands.toLocaleString('it-IT');
+ document.getElementById('paintCost').textContent=price.trim()===''?'—':fmt(buy*Math.max(0,Number(price)||0))+' €';
+}
+function calcBudget(){
+ const sub=['b1','b2','b3','b4','bextra'].reduce((s,id)=>s+val(id),0),extra=sub*val('bcont')/100;
+ document.getElementById('budgetSub').textContent=fmt(sub)+' €';
+ document.getElementById('budgetExtra').textContent=fmt(extra)+' €';
+ document.getElementById('budgetTotal').textContent=fmt(sub+extra)+' €';
+}
+function recalc(){calcTiles();calcPaint();calcBudget()}
+document.querySelectorAll('input,select').forEach(el=>el.addEventListener('input',recalc));
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('.tab').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',b===btn?'true':'false')});
+ document.querySelectorAll('main section.panel').forEach(p=>p.classList.toggle('hidden',p.id!==btn.dataset.tab));
+}));
+document.getElementById('printBtn').addEventListener('click',()=>window.print());
+document.getElementById('resetBtn').addEventListener('click',()=>{
+ document.querySelectorAll('input').forEach(el=>{if(el.id==='tl')el.value='5.60';else if(el.id==='tw')el.value='3.15';else if(el.id==='tsl'||el.id==='tsw')el.value='31';else if(el.id==='pack')el.value='10';else if(el.id==='pl')el.value='5';else if(el.id==='pw')el.value='4';else if(el.id==='ph')el.value='2.7';else if(el.id==='popen')el.value='3';else if(el.id==='pcover')el.value='10';else if(el.id==='b1')el.value='90';else if(el.id==='b2')el.value='25';else if(['b3','b4','bextra'].includes(el.id))el.value='0';else el.value=''});
+ document.getElementById('waste').value='10';document.getElementById('phands').value='2';document.getElementById('bcont').value='10';recalc();
+});
+recalc();
+</script>
+</body>
+</html>
