@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#173f35">
+<meta name="description" content="Calcolatori gratuiti per piastrelle, pittura e materiali: stima quantità, pacchi e costi dei piccoli lavori in casa.">
+<meta name="robots" content="index,follow">
 <title>CalcolaCasa — calcolatori per lavori in casa</title>
 <style>
 :root{--green:#173f35;--mint:#e8f2ed;--ink:#17211d;--muted:#66736d;--line:#dce5df;--paper:#fff;--bg:#f5f7f5;--accent:#d4e9dc}
@@ -68,7 +70,9 @@ footer{padding:0 14px 28px;color:var(--muted);font-size:12px;text-align:center}
       <div class="field"><label for="tsw">Altro lato (cm)</label><input id="tsw" type="number" min="1" step="0.1" value="31"></div>
       <div class="field"><label for="waste">Scarti (%)</label><select id="waste"><option value="5">5% — posa semplice</option><option value="10" selected>10% — consigliato</option><option value="15">15% — tagli/posa diagonale</option></select></div>
       <div class="field"><label for="pack">Piastrelle per pacco</label><input id="pack" type="number" min="1" step="1" value="10"></div>
-      <div class="field full"><label for="tileprice">Prezzo per pacco (€) — facoltativo</label><input id="tileprice" type="number" min="0" step="0.01" placeholder="es. 24,90"></div>
+      <div class="field"><label for="tileprice">Prezzo per pacco (€) — facoltativo</label><input id="tileprice" type="number" min="0" step="0.01" placeholder="es. 24,90"></div>
+      <div class="field"><label for="adhcoverage">Resa colla (m² per sacco)</label><input id="adhcoverage" type="number" min="0.1" step="0.1" value="4"></div>
+      <div class="field full"><label for="adhprice">Prezzo per sacco di colla (€) — facoltativo</label><input id="adhprice" type="number" min="0" step="0.01" placeholder="es. 8,90"></div>
     </div>
     <div class="result" aria-live="polite">
       <div class="label">Superficie della stanza</div><div class="big" id="tileArea">17,64 m²</div>
@@ -76,7 +80,10 @@ footer{padding:0 14px 28px;color:var(--muted);font-size:12px;text-align:center}
         <div class="detail"><span>Piastrelle stimate con scarti</span><strong id="tileCount">207</strong></div>
         <div class="detail"><span>Pacchi da acquistare</span><strong id="tilePacks">21</strong></div>
         <div class="detail"><span>Superficie con scarti</span><strong id="tileWasteArea">19,40 m²</strong></div>
-        <div class="detail"><span>Costo stimato</span><strong id="tileCost">—</strong></div>
+        <div class="detail"><span>Costo piastrelle</span><strong id="tileCost">—</strong></div>
+        <div class="detail"><span>Sacchi di colla stimati</span><strong id="adhBags">5</strong></div>
+        <div class="detail"><span>Costo colla</span><strong id="adhCost">—</strong></div>
+        <div class="detail"><span>Totale piastrelle + colla</span><strong id="tileGrandCost">—</strong></div>
       </div>
     </div>
     <p class="note">Stima matematica: la forma della stanza, la larghezza delle fughe, i tagli e il formato reale delle piastrelle possono modificare la quantità necessaria.</p>
@@ -129,6 +136,7 @@ footer{padding:0 14px 28px;color:var(--muted);font-size:12px;text-align:center}
 
   <div class="actions">
     <button class="secondary" id="printBtn">Stampa / Salva PDF</button>
+    <button class="secondary" id="shareBtn">Condividi CalcolaCasa</button>
     <button class="secondary" id="resetBtn">Ripristina valori iniziali</button>
   </div>
 </main>
@@ -138,14 +146,19 @@ const fmt=(n,d=2)=>Number.isFinite(n)?n.toLocaleString('it-IT',{minimumFractionD
 const val=id=>Math.max(0,Number(document.getElementById(id).value)||0);
 function calcTiles(){
  const l=val('tl'),w=val('tw'),sl=val('tsl')/100,sw=val('tsw')/100,sc=val('waste')/100,pack=Math.max(1,Math.floor(val('pack'))),price=document.getElementById('tileprice').value;
- const area=l*w, tileArea=sl*sw;
+ const area=l*w, tileArea=sl*sw, adhesiveCoverage=Math.max(.1,val('adhcoverage')), adhesivePrice=document.getElementById('adhprice').value;
  const count=tileArea>0?Math.ceil(area*(1+sc)/tileArea):0;
- const packs=Math.ceil(count/pack);
+ const packs=Math.ceil(count/pack), bags=Math.ceil(area*(1+sc)/adhesiveCoverage);
  document.getElementById('tileArea').textContent=fmt(area)+' m²';
  document.getElementById('tileCount').textContent=count.toLocaleString('it-IT');
  document.getElementById('tilePacks').textContent=packs.toLocaleString('it-IT');
  document.getElementById('tileWasteArea').textContent=fmt(area*(1+sc))+' m²';
- document.getElementById('tileCost').textContent=price.trim()===''?'—':fmt(packs*Math.max(0,Number(price)||0))+' €';
+ const tileCost=price.trim()===''?null:packs*Math.max(0,Number(price)||0);
+ const glueCost=adhesivePrice.trim()===''?null:bags*Math.max(0,Number(adhesivePrice)||0);
+ document.getElementById('tileCost').textContent=tileCost===null?'—':fmt(tileCost)+' €';
+ document.getElementById('adhBags').textContent=bags.toLocaleString('it-IT');
+ document.getElementById('adhCost').textContent=glueCost===null?'—':fmt(glueCost)+' €';
+ document.getElementById('tileGrandCost').textContent=tileCost===null&&glueCost===null?'—':fmt((tileCost||0)+(glueCost||0))+' €';
 }
 function calcPaint(){
  const l=val('pl'),w=val('pw'),h=val('ph'),open=val('popen'),cover=Math.max(.1,val('pcover')),hands=val('phands'),price=document.getElementById('pprice').value;
@@ -169,8 +182,9 @@ document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>
  document.querySelectorAll('main section.panel').forEach(p=>p.classList.toggle('hidden',p.id!==btn.dataset.tab));
 }));
 document.getElementById('printBtn').addEventListener('click',()=>window.print());
+document.getElementById('shareBtn').addEventListener('click',async()=>{const data={title:'CalcolaCasa',text:'Calcola gratuitamente piastrelle, pittura e costi dei materiali.',url:window.location.href};try{if(navigator.share){await navigator.share(data)}else if(navigator.clipboard){await navigator.clipboard.writeText(data.url);alert('Link copiato: '+data.url)}else{prompt('Copia questo link:',data.url)}}catch(e){if(e.name!=='AbortError')alert('Puoi copiare il link dalla barra degli indirizzi.')}});
 document.getElementById('resetBtn').addEventListener('click',()=>{
- document.querySelectorAll('input').forEach(el=>{if(el.id==='tl')el.value='5.60';else if(el.id==='tw')el.value='3.15';else if(el.id==='tsl'||el.id==='tsw')el.value='31';else if(el.id==='pack')el.value='10';else if(el.id==='pl')el.value='5';else if(el.id==='pw')el.value='4';else if(el.id==='ph')el.value='2.7';else if(el.id==='popen')el.value='3';else if(el.id==='pcover')el.value='10';else if(el.id==='b1')el.value='90';else if(el.id==='b2')el.value='25';else if(['b3','b4','bextra'].includes(el.id))el.value='0';else el.value=''});
+ document.querySelectorAll('input').forEach(el=>{if(el.id==='tl')el.value='5.60';else if(el.id==='tw')el.value='3.15';else if(el.id==='tsl'||el.id==='tsw')el.value='31';else if(el.id==='pack')el.value='10';else if(el.id==='adhcoverage')el.value='4';else if(el.id==='pl')el.value='5';else if(el.id==='pw')el.value='4';else if(el.id==='ph')el.value='2.7';else if(el.id==='popen')el.value='3';else if(el.id==='pcover')el.value='10';else if(el.id==='b1')el.value='90';else if(el.id==='adhprice')el.value='';else if(el.id==='b2')el.value='25';else if(['b3','b4','bextra'].includes(el.id))el.value='0';else el.value=''});
  document.getElementById('waste').value='10';document.getElementById('phands').value='2';document.getElementById('bcont').value='10';recalc();
 });
 recalc();
